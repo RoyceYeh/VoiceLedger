@@ -28,10 +28,15 @@ function fetchJson<T>(url: string): Promise<T> {
   });
 }
 
-function downloadBuffer(url: string): Promise<Buffer> {
+function downloadBuffer(url: string, maxRedirects = 5): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const client = url.startsWith('https') ? https : http;
     client.get(url, (res) => {
+      if ((res.statusCode === 301 || res.statusCode === 302 || res.statusCode === 307) && res.headers.location) {
+        if (maxRedirects <= 0) { reject(new Error('redirect 次數過多')); return; }
+        resolve(downloadBuffer(res.headers.location, maxRedirects - 1));
+        return;
+      }
       const chunks: Buffer[] = [];
       res.on('data', (chunk: Buffer) => chunks.push(chunk));
       res.on('end', () => resolve(Buffer.concat(chunks)));
