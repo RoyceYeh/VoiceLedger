@@ -24,7 +24,6 @@ export async function handleVoice(ctx: BotContext): Promise<void> {
     const { buffer, filename } = await downloadTelegramFile(fileId);
 
     // STT
-    console.log(`音訊下載完成：${filename}，大小 ${buffer.length} bytes`);
     const transcription = await transcribeAudio(buffer, filename);
     if (!transcription) {
       await ctx.telegram.editMessageText(
