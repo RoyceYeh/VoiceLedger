@@ -1,0 +1,26 @@
+{
+  "name": "voiceledger-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^1.29.0",
+    "@supabase/supabase-js": "^2.49.9",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "groq-sdk": "^0.25.0",
+    "node-cron": "^4.2.1",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.17",
+    "tsx": "^4.19.4",
+    "typescript": "~5.8.3"
+  }
+}

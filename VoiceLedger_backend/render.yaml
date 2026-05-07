@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: voiceledger-bot
+    runtime: node
+    buildCommand: npm install && npx tsc
+    startCommand: node dist/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BOT_MODE
+        value: webhook
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: WEBHOOK_DOMAIN
+        sync: false
+      - key: PORT
+        value: "3000"
