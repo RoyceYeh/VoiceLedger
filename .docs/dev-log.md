@@ -137,3 +137,51 @@
 - **`/summary` 直接查 Supabase 不經 Bot session**：純查詢無副作用，不需要 pending 狀態，直接用 telegram_id 關聯 profile
 - **新增消費 Modal 重用 EditForm 介面**：兩者欄位完全相同，沒有額外抽象的必要
 - **`insertTransaction` 接受 `string | null`**：Supabase INSERT 允許 null，型別與後端 `insertTransactions` 行為一致
+
+---
+
+## 2026-05-07
+
+### 本次完成
+
+#### .gitignore 整理
+- 根目錄新增 `.gitignore`，排除 `.gemini/`
+- 後端 `.gitignore` 從 `.env` 改為 `.env*`（排除所有變體），保留 `!.env.example`
+- 刪除前端 `metadata.json`（UI 模板殘留垃圾檔）
+
+#### 後端部署（Render）
+- Monorepo 結構：Root Directory 設為 `VoiceLedger_backend`
+- Build Command：`npm install --include=dev && npm run build`（devDependencies 需在 build 階段安裝）
+- Start Command：`node dist/index.js`
+- 環境變數逐一設定，`BOT_MODE=webhook`、`NODE_ENV=production`
+- Telegram Webhook 設定：`GET https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://voiceledger.onrender.com/webhook/<TOKEN>`
+
+#### 前端部署（公司 FTP）
+- 網站在子目錄 `/theo/voiceledger/`，`vite.config.ts` 加入 `base: '/theo/voiceledger/'`
+- 移除 build 產出的 hash 檔名：rollupOptions output 設定固定檔名
+- OAuth redirect 改用 `window.location.origin + import.meta.env.BASE_URL`（原本只有 origin 沒有路徑）
+- Supabase → Authentication → URL Configuration 加入正確的 redirect URL
+
+#### 語音轉譯 Bug 修復
+- **問題**：語音永遠轉譯成「謝謝大家」（Whisper 幻覺）
+- **根本原因**：`downloadBuffer` 使用 Node.js `https.get`，不自動追蹤 HTTP redirect，下載到 3KB 的 redirect 回應而非真實音訊
+- **解法**：在 `downloadBuffer` 加入 301/302/307 redirect 處理邏輯
+
+---
+
+### 踩過的坑
+
+| 問題 | 原因 | 解法 |
+|------|------|------|
+| Render build 失敗 TypeScript 型別找不到 | `@types/express` 在 devDependencies，Render 預設不裝 | Build Command 加 `--include=dev` |
+| 前端靜態資源 404 | 網站在子目錄，Vite base 預設為 `/` | `vite.config.ts` 加 `base: '/theo/voiceledger/'` |
+| OAuth 登入後跳回 localhost | `window.location.origin` 只含 domain，缺少子目錄路徑 | 改用 `window.location.origin + import.meta.env.BASE_URL` |
+| Whisper 固定回傳「謝謝大家」 | `https.get` 不追蹤 redirect，拿到 3KB 錯誤回應 | `downloadBuffer` 加入 redirect 處理 |
+
+---
+
+### 技術決策
+
+- **前端用 FTP 而非 Vercel**：使用者公司伺服器已有靜態托管，不需要額外帳號；Vite build 產出純靜態檔案，任何靜態伺服器都可用
+- **後端 Monorepo 不拆 repo**：Render、Vercel 都支援指定子目錄，維持單一 repo 管理更簡單
+- **Node.js `https.get` 不處理 redirect 是已知行為**：axios / node-fetch 會自動處理，但內建模組不會；下載外部資源建議用高階 HTTP 客戶端

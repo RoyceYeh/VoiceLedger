@@ -32,8 +32,9 @@
 - [x] 分析頁：類別分析返回按鈕
 - [x] 分析頁：類別分析固定列出 7 個類別
 - [x] 前端新增消費 Modal（側邊欄按鈕）
+- [x] 部署：後端部署到 Render，設定 Telegram Webhook
+- [x] 部署：前端部署到公司 FTP（/theo/voiceledger/）
+- [x] Supabase INSERT policy：需手動在 SQL Editor 加（新增消費功能的前提）
+- [x] 語音轉譯 Bug：downloadBuffer 不追蹤 HTTP redirect 導致 Whisper 幻覺
 - [ ] 報表頁：尚未實作（目前側邊欄沒有此選項）
-- [ ] 部署：後端部署到 Render，設定 Telegram Webhook
-- [ ] 部署：前端部署到 Vercel（或靜態 FTP hosting）
 - [ ] AI 財務教練：接真實 LLM 生成個人化建議（目前是靜態文字）
-- [ ] Supabase INSERT policy：需手動在 SQL Editor 加（新增消費功能的前提）
