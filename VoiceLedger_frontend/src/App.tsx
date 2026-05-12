@@ -15,7 +15,6 @@ import {
   X,
   TrendingUp,
   MoreHorizontal,
-  Calendar,
   Filter,
   Edit2,
   Trash2,
@@ -756,7 +755,7 @@ const TransactionsView = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col xl:flex-row gap-4 justify-between items-center bg-surface-card p-6 rounded-2xl border border-white/5 shadow-xl glass-panel">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-surface-card p-6 rounded-2xl border border-white/5 shadow-xl glass-panel">
         <div className="flex-1 w-full relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5" />
           <input
@@ -768,34 +767,33 @@ const TransactionsView = ({
           />
         </div>
 
-        <div className="flex flex-wrap gap-3 w-full xl:w-auto items-center">
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
           {/* 日期區間 */}
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-on-surface-variant shrink-0" />
+          <div className="flex flex-col gap-2 md:flex-row md:items-center w-full md:w-auto">
             <input
               type="date"
               value={startDate}
               max={endDate || new Date().toISOString().slice(0, 10)}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-surface-accent/20 border border-outline hover:border-primary/50 text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors cursor-pointer [color-scheme:dark]"
+              className="w-full md:w-auto bg-surface-accent/20 border border-outline hover:border-primary/50 text-on-surface text-sm font-bold rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors cursor-pointer [color-scheme:dark]"
             />
-            <span className="text-on-surface-variant font-bold text-sm">—</span>
+            <span className="hidden md:inline text-on-surface-variant font-bold text-sm">—</span>
             <input
               type="date"
               value={endDate}
               min={startDate}
               max={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-surface-accent/20 border border-outline hover:border-primary/50 text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors cursor-pointer [color-scheme:dark]"
+              className="w-full md:w-auto bg-surface-accent/20 border border-outline hover:border-primary/50 text-on-surface text-sm font-bold rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors cursor-pointer [color-scheme:dark]"
             />
           </div>
 
           {/* 分類篩選 */}
-          <div className="relative">
+          <div className="relative w-full md:w-auto">
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="appearance-none bg-surface-accent/20 border border-outline hover:border-primary/50 text-on-surface text-sm font-bold rounded-xl px-5 py-3 pr-10 focus:outline-none cursor-pointer transition-colors"
+              className="w-full md:w-auto appearance-none bg-surface-accent/20 border border-outline hover:border-primary/50 text-on-surface text-sm font-bold rounded-xl px-5 py-3 pr-10 focus:outline-none cursor-pointer transition-colors"
             >
               <option value="">全部分類</option>
               {['餐飲', '交通', '生活', '購物', '娛樂', '醫療保健', '其他'].map((c) => (
@@ -926,7 +924,69 @@ const TransactionsView = ({
         </div>
       )}
 
-      <div className="glass-panel rounded-2xl overflow-hidden shadow-xl border border-white/5">
+      {/* 手機卡片列表 */}
+      <div className="block md:hidden space-y-3">
+        {error ? (
+          <div className="py-12 text-center text-error font-bold text-sm">載入失敗：{error}</div>
+        ) : loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="glass-panel rounded-2xl p-4 h-24 animate-pulse" />
+          ))
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center text-on-surface-variant font-bold text-sm">
+            {transactions.length === 0 ? '本月尚無交易記錄' : '沒有符合條件的結果'}
+          </div>
+        ) : (
+          filtered.map((tx) => (
+            <motion.div
+              key={tx.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-panel rounded-2xl p-4 space-y-2 border border-white/5"
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className="px-2.5 py-1 rounded-lg text-xs font-black border"
+                  style={{
+                    backgroundColor: `${CATEGORY_COLORS[tx.category]}18`,
+                    color: CATEGORY_COLORS[tx.category],
+                    borderColor: `${CATEGORY_COLORS[tx.category]}30`,
+                  }}
+                >
+                  {tx.category}
+                </span>
+                <span className="text-xs font-bold text-on-surface-variant">{tx.transaction_date}</span>
+              </div>
+              <div>
+                <div className="font-bold text-sm text-on-surface">{tx.description}</div>
+                {tx.merchant && (
+                  <div className="text-xs text-on-surface-variant mt-0.5">{tx.merchant}</div>
+                )}
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <span className={cn('font-black text-sm flex-1', tx.amount < 0 ? 'text-error' : 'text-secondary')}>
+                  {tx.amount < 0 ? `-$${Math.abs(tx.amount).toLocaleString()}` : `+$${tx.amount.toLocaleString()}`}
+                </span>
+                <button
+                  onClick={() => openEdit(tx)}
+                  className="p-2 hover:bg-primary/10 text-on-surface-variant hover:text-primary rounded-xl transition-colors"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setDeletingId(tx.id)}
+                  className="p-2 hover:bg-error/10 text-on-surface-variant hover:text-error rounded-xl transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
+
+      {/* 桌面 Table */}
+      <div className="hidden md:block glass-panel rounded-2xl overflow-hidden shadow-xl border border-white/5">
         {error ? (
           <div className="p-12 text-center text-error font-bold">載入失敗：{error}</div>
         ) : (
@@ -1192,8 +1252,8 @@ export default function App() {
         </div>
       </aside>
 
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen">
-        <header className="h-20 glass-panel border-x-0 border-t-0 flex items-center justify-between px-10 sticky top-0 z-40 backdrop-blur-2xl">
+      <main className="flex-1 md:ml-64 flex flex-col min-h-screen overflow-x-hidden">
+        <header className="h-20 glass-panel border-x-0 border-t-0 flex items-center justify-between px-4 md:px-10 sticky top-0 z-40 backdrop-blur-2xl">
           <div className="flex items-center gap-6 flex-1">
             <button
               className="md:hidden p-2 text-on-surface-variant hover:text-on-surface"
@@ -1317,7 +1377,7 @@ export default function App() {
           </div>
         )}
 
-        <div className="p-10 max-w-screen-2xl mx-auto w-full mb-20">
+        <div className="p-4 md:p-10 max-w-screen-2xl mx-auto w-full mb-20">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
