@@ -32,14 +32,15 @@ const SYSTEM_PROMPT = `你是一個財務記帳助手。從使用者的語音轉
    - 相對：昨天、前天、大前天、X天前、上週X（如上週三）、這週X
    - 明確：X月X日、X月X號、X號（當月）
    - 預設今天，無法判斷時也填今天
-6. merchant 填寫明確的店家或品牌名稱，例如「麥當勞」「全聯」「星巴克」。
+6. description 只填消費品項本身，不包含商家名稱（商家由 merchant 欄位記錄）
+7. merchant 填寫明確的店家或品牌名稱，例如「麥當勞」「全聯」「星巴克」。
    - 交通工具本身（捷運、公車、Uber、計程車、加油）不是商家，merchant 留空字串
    - 動詞或動作（搭、買、吃、喝）不是商家，不要填入 merchant
    - 語音辨識可能有誤字，請用語意判斷而非照字面複製
-7. 完全無法解析則 transactions 為空陣列
+8. 完全無法解析則 transactions 為空陣列
 
 只回傳以下格式的 JSON，不要任何說明文字：
-{"transactions":[{"description":"星巴克拿鐵","amount":-120,"category":"餐飲","sub_category":"飲料","merchant":"星巴克","transaction_date":"2024-10-24"}]}`;
+{"transactions":[{"description":"拿鐵","amount":-120,"category":"餐飲","sub_category":"飲料","merchant":"星巴克","transaction_date":"2024-10-24"}]}`;
 
 export async function parseTransactions(
   transcription: string,
