@@ -5,7 +5,7 @@ const VALID_CATEGORIES: TransactionCategory[] = [
   '餐飲', '交通', '生活', '購物', '娛樂', '醫療保健', '其他',
 ];
 
-const VALID_SUB_CATEGORIES: Record<TransactionCategory, string[]> = {
+export const VALID_SUB_CATEGORIES: Record<TransactionCategory, string[]> = {
   餐飲: ['早餐', '午餐', '晚餐', '飲料', '點心', '酒類', '其他'],
   交通: ['大眾運輸', '計程車', '加油', '停車', '其他'],
   生活: ['理財', '訂閱', '通訊', '日用品', '其他'],
